@@ -11,6 +11,8 @@
 		BFED5E932818DEBA00812BBA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFED5E922818DEBA00812BBA /* ContentView.swift */; };
 		BFED5E952818DEBB00812BBA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFED5E942818DEBB00812BBA /* Assets.xcassets */; };
 		BFED5E982818DEBB00812BBA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFED5E972818DEBB00812BBA /* Preview Assets.xcassets */; };
+		BFED5E9F2818E01100812BBA /* CaptureSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFED5E9E2818E01100812BBA /* CaptureSession.swift */; };
+		BFED5EA32819E4A100812BBA /* DepthMapFromImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFED5EA22819E4A100812BBA /* DepthMapFromImage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +21,9 @@
 		BFED5E922818DEBA00812BBA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BFED5E942818DEBB00812BBA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BFED5E972818DEBB00812BBA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		BFED5E9E2818E01100812BBA /* CaptureSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureSession.swift; sourceTree = "<group>"; };
+		BFED5EA22819E4A100812BBA /* DepthMapFromImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthMapFromImage.swift; sourceTree = "<group>"; };
+		BFF8ABB528204A640079133A /* Depth-Map-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Depth-Map-Info.plist"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,10 +56,13 @@
 		BFED5E8F2818DEBA00812BBA /* Depth Map */ = {
 			isa = PBXGroup;
 			children = (
+				BFF8ABB528204A640079133A /* Depth-Map-Info.plist */,
 				BFED5E902818DEBA00812BBA /* Depth_MapApp.swift */,
 				BFED5E922818DEBA00812BBA /* ContentView.swift */,
 				BFED5E942818DEBB00812BBA /* Assets.xcassets */,
 				BFED5E962818DEBB00812BBA /* Preview Content */,
+				BFED5E9E2818E01100812BBA /* CaptureSession.swift */,
+				BFED5EA22819E4A100812BBA /* DepthMapFromImage.swift */,
 			);
 			path = "Depth Map";
 			sourceTree = "<group>";
@@ -137,8 +145,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFED5EA32819E4A100812BBA /* DepthMapFromImage.swift in Sources */,
 				BFED5E932818DEBA00812BBA /* ContentView.swift in Sources */,
 				BFED5E912818DEBA00812BBA /* Depth_MapApp.swift in Sources */,
+				BFED5E9F2818E01100812BBA /* CaptureSession.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -272,6 +282,10 @@
 				DEVELOPMENT_TEAM = KY7654Q8SW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Depth-Map-Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera Access needed to take pictures.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Needed to save depth map photo";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo Access needed to save images.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -302,6 +316,10 @@
 				DEVELOPMENT_TEAM = KY7654Q8SW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Depth-Map-Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera Access needed to take pictures.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Needed to save depth map photo";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo Access needed to save images.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

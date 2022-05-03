@@ -8,9 +8,24 @@
 import SwiftUI
 
 struct ContentView: View {
+    let captureSession = ImageCaptureManager()
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        VStack {
+            Button("Start Capture Session") {
+                print("Started Capture Session")
+                captureSession.startRunning()
+            }.padding(.all, 10.0)
+            Spacer()
+            Button("Capture Image") {
+                print("Capture Image button clicked")
+                captureSession.capturePhoto()
+            }.padding(.all, 10.0)
+            Spacer()
+            Button("Stop Capture Session") {
+                print("Stopped Capture Session")
+                captureSession.stopRunning()
+            }.padding(.all, 10.0)
+        }
     }
 }
 
