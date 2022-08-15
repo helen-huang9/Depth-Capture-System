@@ -9,21 +9,27 @@ import SwiftUI
 
 struct ContentView: View {
     let captureSession = ImageCaptureManager()
+    
+    @State var symbol = "circle"
+    
     var body: some View {
         VStack {
+            Image(systemName: self.symbol)
             Button("Start Capture Session") {
                 print("Started Capture Session")
-                captureSession.startRunning()
+                self.symbol = "circle.fill"
+                captureSession.startCaptureSession()
             }.padding(.all, 10.0)
             Spacer()
             Button("Capture Image") {
-                print("Capture Image button clicked")
+                print("Captured Image")
                 captureSession.capturePhoto()
             }.padding(.all, 10.0)
             Spacer()
             Button("Stop Capture Session") {
                 print("Stopped Capture Session")
-                captureSession.stopRunning()
+                self.symbol = "circle"
+                captureSession.stopCaptureSession()
             }.padding(.all, 10.0)
         }
     }
