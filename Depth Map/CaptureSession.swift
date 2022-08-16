@@ -11,7 +11,6 @@ import AVFoundation
 import Photos
 
 class ImageCaptureManager: NSObject {
-    
     var captureSession: AVCaptureSession!
     var captureDevice: AVCaptureDevice!
     var captureDeviceInput: AVCaptureInput!
@@ -20,60 +19,48 @@ class ImageCaptureManager: NSObject {
     var previewLayer: AVCaptureVideoPreviewLayer!
     
     var imgNum: Int!
+    var devicePosition: AVCaptureDevice.Position = .back
     
     override init() {
         super.init()
         self.imgNum = 0
-        self.getCameraPermissions()
-    }
-    
-    func getCameraPermissions() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
+        if self.getCameraPermissions() {
             self.setupCaptureSession()
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                if granted { self.setupCaptureSession() }
-            }
-        case .denied:
-            return
-        case .restricted:
-            return
-        @unknown default:
-            fatalError("Unknown AVCaptureDevice authorization status")
+        } else {
+            print("Did not get camera permissions")
         }
     }
     
+    /// Changes to capture session to use the inputted camera position upon its initialization. The camera position is either the front or back camera. 
+    func changeCameraPositionTo(_ pos: AVCaptureDevice.Position) {
+        devicePosition = pos
+        // TODO: update capture device to reflect this change if capture session is running
+    }
+    
+    /// Starts the capture session. This allows data to be collected.
     func startCaptureSession() {
         self.captureSession.startRunning()
     }
     
+    /// Stops the capture session. This stops data from being collected.
     func stopCaptureSession() {
         self.captureSession.stopRunning()
     }
     
-    func capturePhoto() {
-        let uniquePhotoSettings = AVCapturePhotoSettings(from: self.photoSettings)
-        self.photoOutput.capturePhoto(with: uniquePhotoSettings, delegate: self)
-    }
     
+    /// Gets called if getting camera permissions was successful. Sets up the capture session for depth data delivery and configures the photo settings.
     func setupCaptureSession() {
         self.captureSession = AVCaptureSession()
-        
+        configureCaptureSession()
+        enableDepthDelivery()
+        configurePhotoSettings()
+    }
+    
+    /// Configures the capture session by assigning the device input and photo output.
+    func configureCaptureSession() {
         self.captureSession.beginConfiguration()
         // Set an AVCaptureDevice for captureSession input
-        // This is for the front camera, which uses TrueDepth camera
-//        guard let device = AVCaptureDevice.default(.builtInTrueDepthCamera, for: .depthData, position: .unspecified)
-//            else { fatalError("No true depth camera.") }
-        
-        // This is for the back camera, which uses dual cameras
-        guard let device = AVCaptureDevice.default(.builtInDualCamera, for: .depthData, position: .unspecified)
-            else { fatalError("No dual lense camera.") }
-        
-        // This is for the back camera, which uses dual wide cameras (Lo's phone)
-//        guard let device = AVCaptureDevice.default(.builtInDualWideCamera, for: .depthData, position: .unspecified)
-//            else { fatalError("No dual wide lense camera.") }
-        
+        guard let device = getDevice() else { fatalError("Could not find compatible AVCaptureDevice.") }
         self.captureDevice = device
         guard let deviceInput = try? AVCaptureDeviceInput(device: device), self.captureSession.canAddInput(deviceInput) else { fatalError("Can't add video input.") }
         self.captureSession.addInput(deviceInput)
@@ -103,123 +90,27 @@ class ImageCaptureManager: NSObject {
         
         // Save configurations for captureSession
         self.captureSession.commitConfiguration()
-        
-        // Enable depth data delivery for photo output
-        self.photoOutput.isDepthDataDeliveryEnabled = self.photoOutput.isDepthDataDeliverySupported
-        
-        // Configure the capture photo settings used for all photos
-        configurePhotoSettings()
     }
     
-    
+    /// Creates and configures the photo settings used for all photos.
     func configurePhotoSettings() {
         self.photoSettings = AVCapturePhotoSettings()
-        self.photoSettings.isDepthDataDeliveryEnabled = self.photoOutput.isDepthDataDeliverySupported
-        self.photoSettings.isDepthDataFiltered = self.photoOutput.isDepthDataDeliverySupported
-    }
-}
-
-extension ImageCaptureManager: AVCapturePhotoCaptureDelegate {
-    /**
-     Required for depth data delivery.
-     Params:
-     - captureOutput: The photo output performing the capture
-     - photo: An object containing the captured image pixel buffer, along with any metdata and attachments captured along with thep photo (such as a preview image or depth map). This paramater is always non-nil: if an error prevented successful capture,, this object still contains metadata for the intended capture.
-     - error: If the capture process could not proceed successfully, an error object describing the failure; otherwise, nil
-     */
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-        guard error == nil else { print("Error capturing photo: \(error!)"); return }
-
-        // Get Photo library authorization from user
-        PHPhotoLibrary.requestAuthorization { status in
-            guard status == .authorized else { return }
-            
-            PHPhotoLibrary.shared().performChanges({
-                // Add the captured photo's file data as the main resource for the Photos asset.
-                let creationRequest = PHAssetCreationRequest.forAsset()
-                creationRequest.addResource(with: .photo, data: photo.fileDataRepresentation()!, options: nil)
-            }, completionHandler: self.handlePhotoLibraryError)
-        }
-        
-        // Convert relevant depth data to Data object of format 'JSON'
-        let convertedDepthMap = photo.depthData!.converting(toDepthDataType: kCVPixelFormatType_DepthFloat32).depthDataMap
-        guard let cameraCalibrationData = photo.depthData!.cameraCalibrationData else { fatalError("No camera calibration data") }
-        let jsonStringData = wrapImageData(depthMap: convertedDepthMap, calibration: cameraCalibrationData)
-        
-        let imgPath = "depth_\(self.imgNum!)"
-        
-        saveToFile(data: jsonStringData, path: imgPath)
-        print("Finished saving data to file")
-        self.imgNum += 1
+        self.photoSettings.isDepthDataDeliveryEnabled = true
+        self.photoSettings.isDepthDataFiltered = true
     }
     
-    /**
-     Error handling for adding photo to photo library
-     */
-    func handlePhotoLibraryError(output: Bool, error: Error?) {
-        guard error == nil else { print("Error capturing photo: \(error!.localizedDescription)"); return }
-        if (output) {
-            print("Photo successfully added to Photo Library")
-        } else {
-            print("Photo was not added to Photo Library")
-        }
+    /// Returns the first device that satisfies the accepted deviceTypes. Is dependent on the device position stored in devicePosition.
+    func getDevice() -> AVCaptureDevice? {
+        let deviceTypes: [AVCaptureDevice.DeviceType] = [.builtInTrueDepthCamera, .builtInDualCamera, .builtInDualWideCamera, .builtInTripleCamera]
+        let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes, mediaType: .depthData, position: .unspecified)
+        let devices = discoverySession.devices
+        guard !devices.isEmpty else { fatalError("Missing capture devices.")}
+        return devices.first(where: { device in device.position == self.devicePosition })!
     }
     
-    /**
-     Convert depth data to be a 2D array of floats
-     */
-    func convertDepthData(depthMap: CVPixelBuffer) -> [[Float32]] {
-        let width = CVPixelBufferGetWidth(depthMap)
-        let height = CVPixelBufferGetHeight(depthMap)
-        print("Depth Data Width: \(width)")
-        print("Depth Data Height: \(height)")
-        var convertedDepthMap: [[Float32]] = Array(repeating: Array(repeating: 0, count: width), count: height)
-        
-        CVPixelBufferLockBaseAddress(depthMap, CVPixelBufferLockFlags(rawValue: 2))
-        let floatBuffer = unsafeBitCast(CVPixelBufferGetBaseAddress(depthMap), to: UnsafeMutablePointer<Float32>.self)
-        
-        for row in 0 ..< height {
-            for col in 0 ..< width {
-                convertedDepthMap[row][col] = floatBuffer[width * row + col]
-            }
-        }
-        CVPixelBufferUnlockBaseAddress(depthMap, CVPixelBufferLockFlags(rawValue: 2))
-        return convertedDepthMap
-    }
-    
-    /**
-     Converts depth map and calibration data into a 'Data' object in the a JSON format
-     */
-    func wrapImageData(depthMap: CVPixelBuffer, calibration: AVCameraCalibrationData) -> Data {
-        let jsonDict: [String : Any] = [
-            "calibration_data" : [
-                "intrinsic_matrix" : (0 ..< 3).map{ x in
-                    (0 ..< 3).map{ y in calibration.intrinsicMatrix[x][y]}
-                },
-                "pixel_size" : calibration.pixelSize,
-                "intrinsic_matrix_reference_dimensions" : [
-                    calibration.intrinsicMatrixReferenceDimensions.width,
-                    calibration.intrinsicMatrixReferenceDimensions.height
-                ]
-            ],
-            "depth_data" : convertDepthData(depthMap: depthMap)
-        ]
-        let jsonStringData = try! JSONSerialization.data(withJSONObject: jsonDict, options: .prettyPrinted)
-        return jsonStringData
-    }
-    
-    /**
-     Saves the inputted Data object (in the form of a JSON) to a document in the app's document folder
-     */
-    func saveToFile(data: Data, path: String) {
-        print("Saving data to file")
-        let URLpath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(path)
-        print("URLPath: \(URLpath)")
-        
-        do {
-            try data.write(to: URLpath)
-        } catch {
-            print("Error in saving to file: \(error.localizedDescription)")
-        }
+    /// Enable depth data delivery for photo output. Throw an error if depth data is not supported.
+    func enableDepthDelivery() {
+        guard self.photoOutput.isDepthDataDeliverySupported else { fatalError("Photo output does not support depth data.") }
+        self.photoOutput.isDepthDataDeliveryEnabled = true
     }
 }

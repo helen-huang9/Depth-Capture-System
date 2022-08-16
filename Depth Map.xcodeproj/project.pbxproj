@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BF6DE11A28AC459500FF5757 /* UserPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6DE11928AC459500FF5757 /* UserPermissions.swift */; };
+		BF6DE11C28AC48A600FF5757 /* PhotoCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6DE11B28AC48A600FF5757 /* PhotoCapture.swift */; };
 		BFED5E912818DEBA00812BBA /* Depth_MapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFED5E902818DEBA00812BBA /* Depth_MapApp.swift */; };
 		BFED5E932818DEBA00812BBA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFED5E922818DEBA00812BBA /* ContentView.swift */; };
 		BFED5E952818DEBB00812BBA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFED5E942818DEBB00812BBA /* Assets.xcassets */; };
@@ -15,6 +17,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BF6DE11928AC459500FF5757 /* UserPermissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPermissions.swift; sourceTree = "<group>"; };
+		BF6DE11B28AC48A600FF5757 /* PhotoCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCapture.swift; sourceTree = "<group>"; };
 		BFED5E8D2818DEBA00812BBA /* Depth Map.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Depth Map.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFED5E902818DEBA00812BBA /* Depth_MapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Depth_MapApp.swift; sourceTree = "<group>"; };
 		BFED5E922818DEBA00812BBA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -60,6 +64,8 @@
 				BFED5E942818DEBB00812BBA /* Assets.xcassets */,
 				BFED5E962818DEBB00812BBA /* Preview Content */,
 				BFED5E9E2818E01100812BBA /* CaptureSession.swift */,
+				BF6DE11928AC459500FF5757 /* UserPermissions.swift */,
+				BF6DE11B28AC48A600FF5757 /* PhotoCapture.swift */,
 			);
 			path = "Depth Map";
 			sourceTree = "<group>";
@@ -144,7 +150,9 @@
 			files = (
 				BFED5E932818DEBA00812BBA /* ContentView.swift in Sources */,
 				BFED5E912818DEBA00812BBA /* Depth_MapApp.swift in Sources */,
+				BF6DE11C28AC48A600FF5757 /* PhotoCapture.swift in Sources */,
 				BFED5E9F2818E01100812BBA /* CaptureSession.swift in Sources */,
+				BF6DE11A28AC459500FF5757 /* UserPermissions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
