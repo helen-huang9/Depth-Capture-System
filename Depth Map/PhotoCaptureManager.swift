@@ -1,5 +1,5 @@
 //
-//  CaptureSession.swift
+//  PhotoCaptureManager.swift
 //  Depth Map
 //
 //  Created by Helen Huang on 4/26/22.
@@ -10,13 +10,12 @@
 import AVFoundation
 import Photos
 
-class ImageCaptureManager: NSObject {
-    var captureSession: AVCaptureSession!
-    var captureDevice: AVCaptureDevice!
-    var captureDeviceInput: AVCaptureInput!
-    var photoOutput: AVCapturePhotoOutput!
-    var photoSettings: AVCapturePhotoSettings!
-    var previewLayer: AVCaptureVideoPreviewLayer!
+class PhotoCaptureManager: NSObject, ObservableObject {
+    var captureSession = AVCaptureSession()
+    var captureDevice: AVCaptureDevice?
+    var captureDeviceInput: AVCaptureInput?
+    var photoOutput = AVCapturePhotoOutput()
+    var photoSettings = AVCapturePhotoSettings()
     
     var imgNum: Int!
     var devicePosition: AVCaptureDevice.Position = .back
@@ -26,6 +25,7 @@ class ImageCaptureManager: NSObject {
         self.imgNum = 0
         if self.getCameraPermissions() {
             self.setupCaptureSession()
+            print("Finished setting up capture session.")
         } else {
             print("Did not get camera permissions")
         }
@@ -40,17 +40,18 @@ class ImageCaptureManager: NSObject {
     /// Starts the capture session. This allows data to be collected.
     func startCaptureSession() {
         self.captureSession.startRunning()
+        print("Started Capture Session")
     }
     
     /// Stops the capture session. This stops data from being collected.
     func stopCaptureSession() {
         self.captureSession.stopRunning()
+        print("Stopped Capture Session")
     }
     
     
     /// Gets called if getting camera permissions was successful. Sets up the capture session for depth data delivery and configures the photo settings.
     func setupCaptureSession() {
-        self.captureSession = AVCaptureSession()
         configureCaptureSession()
         enableDepthDelivery()
         configurePhotoSettings()
@@ -67,23 +68,23 @@ class ImageCaptureManager: NSObject {
         self.captureDeviceInput = deviceInput
         
         // Set an AVCapturePhotoOutput for captureSession output
-        self.photoOutput = AVCapturePhotoOutput()
         guard self.captureSession.canAddOutput(self.photoOutput) else { fatalError("Can't add photo output.") }
         self.captureSession.addOutput(self.photoOutput)
         self.captureSession.sessionPreset = .photo
         
         // Select a depth (not disparity) format that works with the active color format
         do {
-            try self.captureDevice.lockForConfiguration()
-            let availableFormats = self.captureDevice.activeFormat.supportedDepthDataFormats
+            guard let device = self.captureDevice else { fatalError("No capture device found for depth formatting.") }
+            try device.lockForConfiguration()
+            let availableFormats = device.activeFormat.supportedDepthDataFormats
             let depthFormat = availableFormats.filter { format in
                 let pixelFormatType = CMFormatDescriptionGetMediaSubType(format.formatDescription)
                 
                 return (pixelFormatType == kCVPixelFormatType_DepthFloat32 ||
                         pixelFormatType == kCVPixelFormatType_DepthFloat16)
             }.first
-            self.captureDevice.activeDepthDataFormat = depthFormat
-            self.captureDevice.unlockForConfiguration()
+            device.activeDepthDataFormat = depthFormat
+            device.unlockForConfiguration()
         } catch {
             fatalError("Couldn't configure capture device to have depth format.")
         }
@@ -94,7 +95,6 @@ class ImageCaptureManager: NSObject {
     
     /// Creates and configures the photo settings used for all photos.
     func configurePhotoSettings() {
-        self.photoSettings = AVCapturePhotoSettings()
         self.photoSettings.isDepthDataDeliveryEnabled = true
         self.photoSettings.isDepthDataFiltered = true
     }

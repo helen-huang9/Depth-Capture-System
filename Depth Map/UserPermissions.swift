@@ -8,7 +8,7 @@
 import AVFoundation
 import Photos
 
-extension ImageCaptureManager {
+extension PhotoCaptureManager {
     /// Get camera permission from user for AVCaptureDevice use.
     func getCameraPermissions() -> Bool {
         var status = false

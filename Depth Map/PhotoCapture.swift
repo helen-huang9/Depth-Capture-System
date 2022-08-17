@@ -8,11 +8,12 @@
 import AVFoundation
 import Photos
 
-extension ImageCaptureManager: AVCapturePhotoCaptureDelegate {
+extension PhotoCaptureManager: AVCapturePhotoCaptureDelegate {
     /// Called each time the user captures a photo.
     func capturePhoto() {
         let uniquePhotoSettings = AVCapturePhotoSettings(from: self.photoSettings)
         self.photoOutput.capturePhoto(with: uniquePhotoSettings, delegate: self)
+        print("Captured Image")
     }
     
     /**

@@ -6,74 +6,27 @@
 //
 
 import SwiftUI
+import AVFoundation
 
-enum CaptureStatus: String {
-    case off = "circle"
-    case on = "circle.fill"
+enum CaptureStatus {
+    case on
+    case off
 }
 
 struct ContentView: View {
-    let captureSession = ImageCaptureManager()
-    
-    @State var symbol = CaptureStatus.off
-    @State var cameraPos = "back"
+    @ObservedObject private var captureManager = PhotoCaptureManager()
+    @State private var captureStatus = CaptureStatus.off
     
     var body: some View {
-        VStack {
-            if self.symbol == CaptureStatus.on {
-                Image(systemName: self.symbol.rawValue)
-                    .foregroundColor(Color.green)
-            } else {
-                Image(systemName: self.symbol.rawValue)
-                    .foregroundColor(Color.red)
+        ZStack {
+            if captureStatus == .off {
+                InitialView(captureStatus: $captureStatus)
+                    .environmentObject(captureManager)
             }
-            Spacer()
-            Text("Capture Session").font(.title)
-            Button("Start Capture Session") {
-                print("Started Capture Session")
-                self.symbol = CaptureStatus.on
-                captureSession.startCaptureSession()
+            else if captureStatus == .on {
+                CaptureSessionView(captureStatus: $captureStatus)
+                    .environmentObject(captureManager)
             }
-            .padding(.all, 10.0)
-            .background(Color(red: 0.85, green: 0.85, blue: 0.9, opacity: 0.85).cornerRadius(20))
-            .disabled(self.symbol == CaptureStatus.on)
-            
-            Button("Stop Capture Session") {
-                print("Stopped Capture Session")
-                self.symbol = CaptureStatus.off
-                captureSession.stopCaptureSession()
-            }
-            .padding(.all, 10.0)
-            .background(Color(red: 0.85, green: 0.85, blue: 0.9, opacity: 0.85).cornerRadius(20))
-            .disabled(self.symbol == CaptureStatus.off)
-            
-            Spacer()
-            
-            Text("Settings").font(.title)
-            HStack {
-                Text("Using \(self.cameraPos) camera")
-                Button("Change") {
-                    if cameraPos == "back" {
-                        captureSession.changeCameraPositionTo(.front)
-                        self.cameraPos = "front"
-                    } else {
-                        captureSession.changeCameraPositionTo(.back)
-                        self.cameraPos = "back"
-                    }
-                }
-                .padding(.all, 10.0)
-            }
-            .disabled(self.symbol == CaptureStatus.on)
-            
-            Spacer()
-            
-            Button("Capture Image") {
-                print("Captured Image")
-                captureSession.capturePhoto()
-            }
-            .padding(.all, 12.0)
-            .background(Color(red: 0.85, green: 0.85, blue: 0.9, opacity: 0.85).cornerRadius(20))
-            .disabled(self.symbol == CaptureStatus.off)
         }
     }
 }
