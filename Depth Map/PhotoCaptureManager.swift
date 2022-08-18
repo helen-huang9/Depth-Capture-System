@@ -35,7 +35,8 @@ class PhotoCaptureManager: NSObject, ObservableObject {
     /// Changes to capture session to use the inputted camera position upon its initialization. The camera position is either the front or back camera. 
     func changeCameraPositionTo(_ pos: AVCaptureDevice.Position) {
         devicePosition = pos
-        // TODO: update capture device to reflect this change if capture session is running
+        self.captureSession = AVCaptureSession()
+        self.setupCaptureSession()
     }
     
     /// Starts the capture session. This allows data to be collected.
@@ -56,6 +57,7 @@ class PhotoCaptureManager: NSObject, ObservableObject {
         configureCaptureSession()
         enableDepthDelivery()
         configurePhotoSettings()
+        print("Finished setting up capture session.")
     }
     
     /// Configures the capture session by assigning the device input and photo output.
@@ -100,6 +102,21 @@ class PhotoCaptureManager: NSObject, ObservableObject {
         self.photoSettings.isDepthDataFiltered = true
     }
     
+    /// Returns the first device that satisfies the accepted deviceTypes. Is dependent on the device position stored in devicePosition.
+    func getDevice() -> AVCaptureDevice? {
+        let deviceTypes: [AVCaptureDevice.DeviceType] = [.builtInTrueDepthCamera, .builtInDualCamera, .builtInDualWideCamera, .builtInTripleCamera]
+        let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes, mediaType: .depthData, position: .unspecified)
+        let devices = discoverySession.devices
+        guard !devices.isEmpty else { fatalError("Missing capture devices.")}
+        return devices.first(where: { device in device.position == self.devicePosition })!
+    }
+    
+    /// Enable depth data delivery for photo output. Throw an error if depth data is not supported.
+    func enableDepthDelivery() {
+        guard self.photoOutput.isDepthDataDeliverySupported else { fatalError("Photo output does not support depth data.") }
+        self.photoOutput.isDepthDataDeliveryEnabled = true
+    }
+    
     /// Creates a directory with the name self.dirName.
     /// - Returns: true if successful, false otherwise.
     func createDirectory(dirName: String) -> Bool {
@@ -118,18 +135,15 @@ class PhotoCaptureManager: NSObject, ObservableObject {
         }
     }
     
-    /// Returns the first device that satisfies the accepted deviceTypes. Is dependent on the device position stored in devicePosition.
-    func getDevice() -> AVCaptureDevice? {
-        let deviceTypes: [AVCaptureDevice.DeviceType] = [.builtInTrueDepthCamera, .builtInDualCamera, .builtInDualWideCamera, .builtInTripleCamera]
-        let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes, mediaType: .depthData, position: .unspecified)
-        let devices = discoverySession.devices
-        guard !devices.isEmpty else { fatalError("Missing capture devices.")}
-        return devices.first(where: { device in device.position == self.devicePosition })!
-    }
-    
-    /// Enable depth data delivery for photo output. Throw an error if depth data is not supported.
-    func enableDepthDelivery() {
-        guard self.photoOutput.isDepthDataDeliverySupported else { fatalError("Photo output does not support depth data.") }
-        self.photoOutput.isDepthDataDeliveryEnabled = true
+    func removeDirectory(dirName: String) {
+        let dirPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(dirName)
+        if FileManager.default.fileExists(atPath: dirPath.path) {
+            do {
+                try FileManager.default.removeItem(at: dirPath)
+                print("Successfully deleted directory.")
+            } catch {
+                print("Failed to delete directory. \(error.localizedDescription)")
+            }
+        }
     }
 }
