@@ -17,7 +17,8 @@ class PhotoCaptureManager: NSObject, ObservableObject {
     var photoOutput = AVCapturePhotoOutput()
     var photoSettings = AVCapturePhotoSettings()
     
-    var imgNum: Int!
+    var dirURL: URL?
+    var imgNum = 0
     var devicePosition: AVCaptureDevice.Position = .back
     
     override init() {
@@ -97,6 +98,24 @@ class PhotoCaptureManager: NSObject, ObservableObject {
     func configurePhotoSettings() {
         self.photoSettings.isDepthDataDeliveryEnabled = true
         self.photoSettings.isDepthDataFiltered = true
+    }
+    
+    /// Creates a directory with the name self.dirName.
+    /// - Returns: true if successful, false otherwise.
+    func createDirectory(dirName: String) -> Bool {
+        let dirPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(dirName)
+        if !FileManager.default.fileExists(atPath: dirPath.path) {
+            do {
+                try FileManager.default.createDirectory(atPath: dirPath.path, withIntermediateDirectories: true)
+                self.dirURL = dirPath
+                return true
+            } catch {
+                print(error.localizedDescription)
+                return false
+            }
+        } else {
+            return false
+        }
     }
     
     /// Returns the first device that satisfies the accepted deviceTypes. Is dependent on the device position stored in devicePosition.

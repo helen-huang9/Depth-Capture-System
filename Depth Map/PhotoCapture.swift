@@ -34,7 +34,7 @@ extension PhotoCaptureManager: AVCapturePhotoCaptureDelegate {
         guard let cameraCalibrationData = photo.depthData!.cameraCalibrationData else { fatalError("No camera calibration data") }
         let jsonStringData = wrapImageData(depthMap: convertedDepthMap, calibration: cameraCalibrationData)
         
-        let imgPath = "depth_\(self.imgNum!)"
+        let imgPath = "depth_\(self.imgNum)"
         
         saveToFile(data: jsonStringData, path: imgPath)
         print("Finished saving data to file")
@@ -95,11 +95,15 @@ extension PhotoCaptureManager: AVCapturePhotoCaptureDelegate {
      */
     func saveToFile(data: Data, path: String) {
         print("Saving data to file")
-        let URLpath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(path)
-        print("URLPath: \(URLpath)")
+        guard let dir = self.dirURL else {
+            print("Couldn't find depth data directory.")
+            return
+        }
         
         do {
-            try data.write(to: URLpath)
+            let filePath = dir.appendingPathComponent(path)
+            print("filepath: \(filePath)")
+            try data.write(to: filePath)
         } catch {
             print("Error in saving to file: \(error.localizedDescription)")
         }
