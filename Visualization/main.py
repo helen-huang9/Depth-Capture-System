@@ -101,8 +101,8 @@ def main():
 
     x = 0
     xyz, xyz_color = rectify_pcd(depth_data[x].points3d, color_images[x], K, depth_width, depth_height)
-    show_point_cloud(xyz, xyz_color)
-    show_voxel_model(xyz, xyz_color, voxel_size=0.003)
+    # show_point_cloud(xyz, xyz_color)
+    show_voxel_model(xyz, xyz_color, voxel_size=0.001)
     
     # # Iterate through each image
     # for p in range(num_cloud_points):

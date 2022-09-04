@@ -8,7 +8,7 @@ def parse_args():
         description="3D Reconstruction from Depth Maps")
     parser.add_argument(
         '--data',
-        default=os.getcwd() + '/Visualization/data/',
+        default=os.getcwd() + '/data/',
         help='Folder where RGBD data is stored')
     parser.add_argument(
         '--images',
@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument(
         '--show-depth',
         type=bool,
-        default=False,
+        default=True,
         help='Show intermediate depth images with corresponding colored image.'
     )
 
