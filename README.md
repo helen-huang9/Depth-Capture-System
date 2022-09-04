@@ -11,8 +11,8 @@ Depth capture app view:
 
 Captured view's color image and depth map:
 
-<img src="imgs/Squishy_Color.JPG" alt="depth map" width="350">
-<img src="imgs/Squishy_Depth.png" alt="depth map" width="450">
+<img src="imgs/Squishy_Color.JPG" alt="depth map" width="350"><img src="imgs/Squishy_Depth.png" alt="depth map" width="450">
 
 Resulting 3D voxel model:
 
+https://user-images.githubusercontent.com/77767589/188322501-8d87a5dd-196b-4fe0-bbb0-f6ee5c4399f6.mp4
